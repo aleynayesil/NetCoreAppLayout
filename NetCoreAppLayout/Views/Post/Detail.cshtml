@@ -1,0 +1,58 @@
+﻿
+@{
+    ViewData["Title"] = "Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model PostDetailViewModel
+Başlık : <h2>@Model.PostTitle</h2>
+<hr />
+İçerik : <p>@Model.PostBody</p>
+
+Yorumlar :
+<ul class="list-group-flush" id="comments">
+    @foreach (var item in Model.PostComments)
+    {
+        <li class="list-group-item"><span class="text-info">@item.CommentBy </span>@item.Message (@item.CommentDate.ToShortDateString())</li>
+    }
+</ul>
+<form id="commentForm" name="CommentForm">
+    <div class="form-group">
+        <input type="email" class="form-control" name="Email" placeholder="Email" />
+    </div>
+    <div class="form-group">
+        <textarea class="form-control" placeholder="Mesajınız" name="Message"></textarea>
+    </div>
+    <div class="form-group">
+        <input type="submit" class="btn btn-dark" name="name" value="Yorum Yap" />
+    </div>
+</form>
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $("#commentForm").on("submit", function (event) {
+                event.preventDefault(); //form durdur
+                const param = {
+                    email: CommentForm.Email.value,
+                    message: CommentForm.Message.value
+                };
+                $.ajax({
+                    method: 'Post',
+                    url: '/send-comment',
+                    data: JSON.stringify(param),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        //li append et
+                        const listTemplate = `<li class="list-group-item"><span class="text-info">${CommentForm.Email.value}</span>${CommentForm.Message.value} (Şuan)</li>`;
+                        $('#comments').append(listTemplate);
+                        alert(response?.message);
+                        $('#CommentForm')
+                    },
+                    error: function (err) {
+                        //throw new exception fıraltırsak zaten buraya düşecek
+                        console.log('err', err);
+                    }
+                })
+            })
+        })
+    </script>
+}
